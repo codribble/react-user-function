@@ -7,6 +7,7 @@ import Button from "../Button";
 import Link from "next/link";
 import HorizontalRule from "../HorizontalRule";
 import styles from "./RegisterPage.module.css";
+import { useRouter } from "next/navigation";
 
 function RegisterPage() {
   const [values, setValues] = useState({
@@ -15,6 +16,10 @@ function RegisterPage() {
     password: "",
     passwordRepeat: "",
   });
+
+  const router = useRouter();
+  const [isPending, setIsPending] = useState(false);
+  const [error, setError] = useState(null);
 
   function handleChange(e) {
     const { name, value } = e.target;
@@ -33,6 +38,54 @@ function RegisterPage() {
     // 3. 로딩 상태를 만들고 로딩중일 때는 회원가입 버튼을 비활성화 합니다.
     // 4. 추가로 로딩중일 때는 회원가입 버튼텍스트를 "회원가입 중..."으로 변경합니다.
     // 5. 에러 상태를 만들고 회원가입 요청이 실패 시 에러 메시지를 회원가입버튼 바로 위에 표시합니다.
+    const { name, email, password, passwordRepeat } = values;
+
+    if (
+      name === "" ||
+      email === "" ||
+      password === "" ||
+      passwordRepeat === ""
+    ) {
+      alert("필수입력란이 비어있습니다.");
+      return;
+    }
+    if (password !== passwordRepeat) {
+      alert("비밀번호가 일치하지 않습니다.");
+      return;
+    }
+
+    try {
+      setIsPending(true);
+      setError(null);
+
+      const res = await fetch(
+        `https://learn.codeit.kr/api/link-service/users`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email,
+            name,
+            password,
+          }),
+        },
+      );
+
+      if (!res.ok) {
+        alert("회원가입에 실패했습니다.");
+        return;
+      }
+
+      // console.log(res);
+
+      router.push("/login");
+    } catch (error) {
+      setError(error.message || "회원가입에 실패했습니다.");
+    } finally {
+      setIsPending(false);
+    }
   }
 
   return (
@@ -98,7 +151,10 @@ function RegisterPage() {
           value={values.passwordRepeat}
           onChange={handleChange}
         />
-        <Button className={styles.Button}>회원가입</Button>
+        {error && <p className={styles.Error}>{error}</p>}
+        <Button className={styles.Button} disabled={isPending}>
+          {isPending ? "가입중..." : "회원가입"}
+        </Button>
         <div>
           이미 회원이신가요? <Link href="/login">로그인하기</Link>
         </div>
