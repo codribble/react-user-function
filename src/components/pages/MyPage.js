@@ -13,18 +13,8 @@ function MyPage() {
 
   async function getMe() {
     try {
-      const response = await fetch(
-        "https://learn.codeit.kr/api/link-service/users/me",
-        {
-          credentials: "include",
-        },
-      );
+      const userData = await userService.getMe();
 
-      if (!response.ok) {
-        throw new Error("사용자 정보를 가져오는데 실패했습니다.");
-      }
-
-      const userData = await response.json();
       setUser(userData);
     } catch (error) {
       console.error("사용자 정보 가져오기 실패:", error);
@@ -37,18 +27,8 @@ function MyPage() {
 
   async function getMyLinks() {
     try {
-      const response = await fetch(
-        "https://learn.codeit.kr/api/link-service/users/me/links",
-        {
-          credentials: "include",
-        },
-      );
+      const linksData = await userService.getMyLinks();
 
-      if (!response.ok) {
-        throw new Error("링크 정보를 가져오는데 실패했습니다.");
-      }
-
-      const linksData = await response.json();
       setLinks(linksData);
     } catch (error) {
       console.error("링크 정보 가져오기 실패:", error);
