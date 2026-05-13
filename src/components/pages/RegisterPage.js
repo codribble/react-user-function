@@ -9,6 +9,7 @@ import Link from "next/link";
 import HorizontalRule from "../HorizontalRule";
 import styles from "./RegisterPage.module.css";
 import { authService } from "@/lib/authService";
+import { useAuth } from "@/providers/AuthProvider";
 
 function RegisterPage() {
   const [values, setValues] = useState({
@@ -20,6 +21,8 @@ function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const router = useRouter();
+
+  const { register } = useAuth();
 
   function handleChange(e) {
     const { name, value } = e.target;
@@ -41,7 +44,7 @@ function RegisterPage() {
       setLoading(true);
       setError(null);
 
-      await authService.register(values.name, values.email, values.password);
+      await register(values.name, values.email, values.password);
 
       // 회원가입 성공 후 처리
       alert("회원가입에 성공했습니다.");
