@@ -53,7 +53,33 @@ export const cookieFetch = async (url, options = {}) => {
     },
   };
 
-  const response = await fetch(`${baseURL}${url}`, mergedOptions);
+  // const response = await fetch(`${baseURL}${url}`, mergedOptions);
+
+  // 원래 요청 실행
+  let response = await fetch(`${baseURL}${url}`, mergedOptions);
+
+  // 401 에러 발생 시 토큰 갱신 시도
+  if (response.status === 401) {
+    try {
+      // 토큰 갱신 요청
+      // TODO: API 문서 확인해서 토큰 갱신 요청하세요
+      const refreshResponse = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/auth/token/refresh`,
+        {
+          method: "POST",
+          credentials: "include",
+          cache: "no-store",
+        },
+      );
+
+      if (refreshResponse.ok) {
+        // 토큰 갱신 성공 시 원래 요청 재시도
+        response = await fetch(`${baseURL}${url}`, mergedOptions);
+      }
+    } catch (error) {
+      console.error("토큰 갱신 실패:", error);
+    }
+  }
 
   if (!response.ok) {
     throw new Error(`API error: ${response.status}`);
